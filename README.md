@@ -1,7 +1,7 @@
 # whatsapp-clone
 
 ## Stack
-
+-**Taha Canıbek** - 64220031
 ### Frontend
 
 - React
