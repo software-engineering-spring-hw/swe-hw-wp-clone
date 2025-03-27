@@ -1,7 +1,12 @@
+## Contributors
+
+- **Arda Ocak** – 64220037
+- **Taha Canibek** – 64220031
+
 # whatsapp-clone
 
 ## Stack
--**Taha Canıbek** - 64220031
+
 ### Frontend
 
 - React
