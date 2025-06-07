@@ -5,6 +5,12 @@ const resolversConfig = {
   Message: {
     createdAt: (parent: any) => parent.createdAt?.toISOString()
   },
+  User: {
+    ...userResolvers.User
+  },
+  SidebarUser: {
+    ...userResolvers.SidebarUser
+  },
   Query: {
     ...userResolvers.Query,
     ...messageResolvers.Query

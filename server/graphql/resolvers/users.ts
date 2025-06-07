@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import generateToken from "../../utils/generate-token";
 import { UserInputError } from "apollo-server";
 import { QueryTypes } from "sequelize";
-import { sequelize, User } from "../../db/models/models-config";
+import { sequelize, User, BlockedUsers } from "../../db/models/models-config";
 import { User as UserType, ContextUser, LatestMessage } from "../../types/types";
 import { getTotalUsers, getUsersWithLatestMessage } from "../../db/raw-queries/users";
 // eslint-disable-next-line
@@ -35,6 +35,24 @@ export default {
       const { id } = args;
       const user = await User.findOne({ where: { id } });
       return user;
+    },
+    getBlockedUsers: async (_: any, args: any, { user }: { user: ContextUser }) => {
+      try {
+        if (!user) throw new Error("Authentication required");
+        
+        const blockedUsers = await User.findAll({
+          include: [{
+            model: BlockedUsers,
+            as: 'blockedByUsers',
+            where: { blocker_id: user.id },
+            required: true
+          }]
+        });
+        
+        return blockedUsers;
+      } catch (error: any) {
+        throw new Error(error.message);
+      }
     }
   },
   Mutation: {
@@ -67,6 +85,94 @@ export default {
 
       const { id, firstName, lastName, image } = user;
       return { user: { id, firstName, lastName, username, image }, token: generateToken({ id, firstName, lastName }) };
+    },
+    blockUser: async (_: any, { userId }: { userId: string }, { user }: { user: ContextUser }) => {
+      try {
+        if (!user) throw new Error("Authentication required");
+        
+        if (parseInt(userId) === Number(user.id)) {
+          throw new Error("Cannot block yourself");
+        }
+        
+        await BlockedUsers.findOrCreate({
+          where: {
+            blocker_id: user.id,
+            blocked_id: parseInt(userId)
+          }
+        });
+        
+        return true;
+      } catch (error: any) {
+        throw new Error(error.message);
+      }
+    },
+    unblockUser: async (_: any, { userId }: { userId: string }, { user }: { user: ContextUser }) => {
+      try {
+        if (!user) throw new Error("Authentication required");
+        
+        await BlockedUsers.destroy({
+          where: {
+            blocker_id: user.id,
+            blocked_id: parseInt(userId)
+          }
+        });
+        
+        return true;
+      } catch (error: any) {
+        throw new Error(error.message);
+      }
+    }
+  },
+  User: {
+    isBlocked: async (parent: any, _: any, { user }: { user: ContextUser }) => {
+      if (!user) return false;
+      
+      const blocked = await BlockedUsers.findOne({
+        where: {
+          blocker_id: user.id,
+          blocked_id: parent.id
+        }
+      });
+      
+      return !!blocked;
+    },
+    hasBlocked: async (parent: any, _: any, { user }: { user: ContextUser }) => {
+      if (!user) return false;
+      
+      const blocked = await BlockedUsers.findOne({
+        where: {
+          blocker_id: parent.id,
+          blocked_id: user.id
+        }
+      });
+      
+      return !!blocked;
+    }
+  },
+  SidebarUser: {
+    isBlocked: async (parent: any, _: any, { user }: { user: ContextUser }) => {
+      if (!user) return false;
+      
+      const blocked = await BlockedUsers.findOne({
+        where: {
+          blocker_id: user.id,
+          blocked_id: parent.id
+        }
+      });
+      
+      return !!blocked;
+    },
+    hasBlocked: async (parent: any, _: any, { user }: { user: ContextUser }) => {
+      if (!user) return false;
+      
+      const blocked = await BlockedUsers.findOne({
+        where: {
+          blocker_id: parent.id,
+          blocked_id: user.id
+        }
+      });
+      
+      return !!blocked;
     }
   }
 };

@@ -1,6 +1,7 @@
 import { useRef, useCallback, Fragment } from "react";
 import { SidebarUser } from "types/types";
 import { List, ListItem, Avatar, Typography, Divider } from "@material-ui/core";
+import { Person } from "@material-ui/icons";
 import { css, cx } from "@emotion/css";
 import { overflowHandler } from "styles/reusable-css-in-js-styles";
 import { getAuthData } from "services/auth";
@@ -45,24 +46,53 @@ const UsersList = ({ users = [], searchValue, isMoreUsersToFetch, selectedUser, 
   return (
     <List className={style}>
       {users.filter(user => `${user.firstName} ${user.lastName}`.toUpperCase().includes(searchValue.toUpperCase()))
-        .map((user, index) => (
-          <Fragment key={index}>
-            <ListItem button className={cx("list-item", selectedUser?.id === user.id && "is-selected")} onClick={() => setSelectedUser({ ...user })}
-              ref={index === users.length - 1 ? lastUserRef : null}>
-              <Avatar alt="avatar" src={user.image} />
-              <div className="text-wrapper">
-                {index > 0 && <Divider className={cx((user.latestMessage?.createdAt && "is-chatted") || "")} />}
-                <div className="first-row">
-                  <Typography component="span" className="fullname">{`${user.firstName} ${user.lastName}`}</Typography>
-                  <Typography component="small">{timeDisplayer(user.latestMessage?.createdAt || "")}</Typography>
+        .map((user, index) => {
+          // Show placeholder avatar if:
+          // 1. They blocked me (hasBlocked = true)
+          // 2. OR we blocked each other (both isBlocked and hasBlocked = true)
+          const shouldShowPlaceholderAvatar = user.hasBlocked;
+          
+          return (
+            <Fragment key={index}>
+              <ListItem 
+                button 
+                className={cx(
+                  "list-item", 
+                  selectedUser?.id === user.id && "is-selected"
+                )} 
+                onClick={() => setSelectedUser({ ...user })}
+                ref={index === users.length - 1 ? lastUserRef : null}
+              >
+                {shouldShowPlaceholderAvatar ? (
+                  // Show placeholder avatar if they blocked you (or mutual block)
+                  <Avatar className="blocked-avatar">
+                    <Person />
+                  </Avatar>
+                ) : (
+                  // Show real avatar if no blocks or only you blocked them
+                  <Avatar alt="avatar" src={user.image} />
+                )}
+                
+                <div className="text-wrapper">
+                  {index > 0 && <Divider className={cx((user.latestMessage?.createdAt && "is-chatted") || "")} />}
+                  <div className="first-row">
+                    <Typography component="span" className="fullname">
+                      {`${user.firstName} ${user.lastName}`}
+                    </Typography>
+                    <Typography component="small">
+                      {timeDisplayer(user.latestMessage?.createdAt || "")}
+                    </Typography>
+                  </div>
+                  <div className="second-row">
+                    <Typography className="last-message" component="span">
+                      {user.latestMessage?.content}
+                    </Typography>
+                  </div>
                 </div>
-                <div className="second-row">
-                  <Typography className="last-message" component="span">{user.latestMessage?.content}</Typography>
-                </div>
-              </div>
-            </ListItem>
-          </Fragment>
-        ))}
+              </ListItem>
+            </Fragment>
+          );
+        })}
     </List>
   );
 };
@@ -81,6 +111,15 @@ const style = css`
 
     &.is-selected {
       background: #f0f2f5;
+    }
+
+    .blocked-avatar {
+      background-color: #e0e0e0 !important;
+      color: #9e9e9e !important;
+      
+      svg {
+        font-size: 1.2rem;
+      }
     }
 
     .text-wrapper {

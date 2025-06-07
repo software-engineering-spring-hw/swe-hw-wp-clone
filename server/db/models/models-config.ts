@@ -1,6 +1,7 @@
 import Sequelize from "sequelize";
 import user from "./user";
 import message from "./message";
+import blockedusers from "./blockedusers";
 // @ts-ignore
 import config from "../config/config";
 
@@ -12,10 +13,11 @@ const sequelize = new Sequelize(environmentConfig);
 
 const models: any = {
   User: user(sequelize, Sequelize.DataTypes),
-  Message: message(sequelize, Sequelize.DataTypes)
+  Message: message(sequelize, Sequelize.DataTypes),
+  BlockedUsers: blockedusers(sequelize)
 };
 
-const { User, Message } = models;
+const { User, Message, BlockedUsers } = models;
 
 User.hasMany(Message, { foreignKey: "senderId" });
 User.hasMany(Message, { foreignKey: "recipientId" });
@@ -31,4 +33,4 @@ Object.keys(models).forEach(modelName => {
 models.sequelize = sequelize;
 models.Sequelize = Sequelize;
 
-export { sequelize, User, Message };
+export { sequelize, User, Message, BlockedUsers };

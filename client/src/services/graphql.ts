@@ -40,6 +40,8 @@ export const GET_All_USERS_EXCEPT_LOGGED = gql`
         firstName
         lastName
         image
+        isBlocked
+        hasBlocked
         latestMessage {
           content
           createdAt
@@ -57,6 +59,8 @@ export const GET_USER = gql`
       firstName
       lastName
       image
+      isBlocked
+      hasBlocked
     }
   }
 `;
@@ -88,6 +92,32 @@ export const NEW_MESSAGE = gql`
       recipientId
       content
       createdAt
+    }
+  }
+`;
+
+// Block/Unblock mutations
+export const BLOCK_USER = gql`
+  mutation BlockUser($userId: ID!) {
+    blockUser(userId: $userId)
+  }
+`;
+
+export const UNBLOCK_USER = gql`
+  mutation UnblockUser($userId: ID!) {
+    unblockUser(userId: $userId)
+  }
+`;
+
+// Get blocked users query
+export const GET_BLOCKED_USERS = gql`
+  query GetBlockedUsers {
+    getBlockedUsers {
+      id
+      firstName
+      lastName
+      username
+      image
     }
   }
 `;

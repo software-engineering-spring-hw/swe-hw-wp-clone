@@ -35,5 +35,26 @@ export default (sequelize: Sequelize, DataTypes: any) => {
     timestamps: false
   });
 
+  // Add the associate method using Object.assign or direct assignment
+  (User as any).associate = (models: any) => {
+    // Add existing associations here if you have any
+    // For example: User.hasMany(models.Message, { foreignKey: 'sender_id' });
+    
+    // Add the new block relationships
+    User.belongsToMany(models.User, {
+      through: models.BlockedUsers,
+      as: 'blockedUsers',
+      foreignKey: 'blocker_id',
+      otherKey: 'blocked_id'
+    });
+    
+    User.belongsToMany(models.User, {
+      through: models.BlockedUsers,
+      as: 'blockedByUsers',
+      foreignKey: 'blocked_id',
+      otherKey: 'blocker_id'
+    });
+  };
+
   return User;
 };

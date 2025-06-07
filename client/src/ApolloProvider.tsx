@@ -48,15 +48,17 @@ const client = new ApolloClient({
       Query: {
         fields: {
           getAllUsersExceptLogged: {
-            keyArgs: false,
-            merge: (prevResult, incomingResult) => {
-              const updatedObj = { ...incomingResult };
-
-              if (prevResult) {
-                updatedObj.users = [...prevResult.users, ...incomingResult.users];
+            keyArgs: ["loggedInUserId"],
+            merge: (existing, incoming, { args }) => {
+              // If offset is 0, it's a refetch - replace the entire list
+              if (args?.offset === "0" || !existing) {
+                return incoming;
               }
-
-              return updatedObj;
+              // Otherwise, it's pagination - append new users
+              return {
+                ...incoming,
+                users: [...(existing.users || []), ...(incoming.users || [])]
+              };
             }
           },
         }
