@@ -38,7 +38,21 @@ export default {
       const message = await Message.create({ senderId: user.id, recipientId, content });
       pubsub.publish("NEW_MESSAGE", { newMessage: message });
       return message;
-    }
+    },
+    pinMessage: async (_: any, { id }: { id: number }) => {
+      const message = await Message.findByPk(id);
+      if (!message) throw new Error("Message not found");
+      message.isPinned = true;
+      await message.save();
+      return message;
+    },
+    unpinMessage: async (_: any, { id }: { id: number }) => {
+      const message = await Message.findByPk(id);
+      if (!message) throw new Error("Message not found");
+      message.isPinned = false;
+      await message.save();
+      return message;
+    },
   },
   Subscription: {
     newMessage: {

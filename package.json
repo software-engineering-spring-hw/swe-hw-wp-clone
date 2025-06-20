@@ -18,5 +18,10 @@
     "copy-server-files-to-dist": "cd server && cp -r package.json ../dist && cp -r node_modules ../dist",
     "postinstall": "npm run create-dist-folder && npm run build-client && npm run build-server && rm -r client && rm -r server",
     "start": "cd dist && npm run start"
+  },
+  "dependencies": {
+    "pg": "^8.16.2",
+    "sequelize": "^6.37.7",
+    "sequelize-cli": "^6.6.3"
   }
 }

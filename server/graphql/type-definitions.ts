@@ -40,6 +40,7 @@ export default gql`
     recipientId: ID!
     content: String
     createdAt: String
+    isPinned: Boolean!
   }
   type Query {
     getAllUsersExceptLogged(id: ID! offset: String! limit: String!): SidebarUsers!
@@ -50,6 +51,8 @@ export default gql`
     login(username: String! password: String!): AuthOperationResponse!
     register(firstName: String! lastName: String! username: String! password: String!): AuthOperationResponse!
     sendMessage(recipientId: ID! content: String!): Message!
+    pinMessage(id: ID!): Message
+    unpinMessage(id: ID!): Message
   }
   type Subscription {
     newMessage: Message!

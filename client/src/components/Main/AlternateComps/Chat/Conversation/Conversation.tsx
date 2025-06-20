@@ -1,4 +1,4 @@
-import { useMemo, RefObject } from "react";
+import { useMemo, RefObject, useContext } from "react";
 import { css, cx } from "@emotion/css";
 import { getAuthData } from "services/auth";
 import { Message } from "types/types";
@@ -6,6 +6,9 @@ import { Typography } from "@material-ui/core";
 import { timeDisplayer } from "@guybendavid/utils";
 import { verticalOverflowHandler } from "styles/reusable-css-in-js-styles";
 import backgroundImage from "images/conversation-background.jpg";
+import { PIN_MESSAGE, UNPIN_MESSAGE } from "services/graphql";
+import { useMutation } from "@apollo/client";
+import { AppContext, AppContextType } from "contexts/AppContext";
 
 export type ConversationMessage = Omit<Message, "recipientId">;
 
@@ -16,6 +19,9 @@ type Props = {
 
 const Conversation = ({ messages = [], chatBottomRef }: Props) => {
   const { loggedInUser } = getAuthData();
+
+  const [pinMessage] = useMutation(PIN_MESSAGE);
+  const [unpinMessage] = useMutation(UNPIN_MESSAGE);
 
   const firstIndexesOfSeries = useMemo(() => {
     if (messages.length === 0) return [];
@@ -39,10 +45,32 @@ const Conversation = ({ messages = [], chatBottomRef }: Props) => {
     return indexes;
   }, [messages]);
 
+  const pinnedMessages = messages.filter(msg => msg.isPinned);
+  const normalMessages = messages.filter(msg => !msg.isPinned);
+
+  const togglePinMessage = async (id: string, isPinned: boolean) => {
+    if (isPinned) {
+      await unpinMessage({ variables: { id } })
+    } else {
+      await pinMessage({ variables: { id }})
+    }
+  };
+
   return (
     <div className={style}>
+      {pinnedMessages.map((message, index) => (
+        <div onClick={() => togglePinMessage(message.id, true)} key={index} className={cx("message",
+          message.senderId === loggedInUser.id && "is-sent-message",
+          firstIndexesOfSeries.includes(index) && "is-first-of-series")}>
+          <Typography component="span">{message.content}</Typography>
+          <Typography component="small">{timeDisplayer(message.createdAt)} 📌</Typography>
+        </div>
+      ))}
+      <div>
+        <hr/>
+      </div>
       {messages.map((message, index) => (
-        <div key={index} className={cx("message",
+        <div onClick={() => togglePinMessage(message.id, false)} key={index} className={cx("message",
           message.senderId === loggedInUser.id && "is-sent-message",
           firstIndexesOfSeries.includes(index) && "is-first-of-series")}>
           <Typography component="span">{message.content}</Typography>

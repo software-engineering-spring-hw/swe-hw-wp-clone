@@ -68,6 +68,7 @@ export const GET_MESSAGES = gql`
       senderId
       content
       createdAt
+      isPinned
     }
   }
 `;
@@ -88,6 +89,25 @@ export const NEW_MESSAGE = gql`
       recipientId
       content
       createdAt
+      isPinned
+    }
+  }
+`;
+
+export const PIN_MESSAGE = gql`
+  mutation PinMessage($id: ID!) {
+    pinMessage(id: $id) {
+      id
+      isPinned
+    }
+  }
+`;
+
+export const UNPIN_MESSAGE = gql`
+  mutation UnpinMessage($id: ID!) {
+    unpinMessage(id: $id) {
+      id
+      isPinned
     }
   }
 `;
