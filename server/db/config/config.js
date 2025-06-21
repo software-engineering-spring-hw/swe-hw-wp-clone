@@ -1,9 +1,9 @@
 // eslint-disable-next-line
-require("dotenv").config();
+require("dotenv").config({ path: __dirname + "/../../.env" });
 
 const { DB, DB_USER, DB_PASSWORD, DB_PROD, DB_USER_PROD, DB_PASSWORD_PROD, DB_HOST_PROD } = process.env;
 const dialect = "postgres";
-
+console.log("DB_USER:", DB_USER);
 module.exports = {
   development: {
     database: DB,

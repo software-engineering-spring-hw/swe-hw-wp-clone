@@ -92,6 +92,16 @@ export const NEW_MESSAGE = gql`
   }
 `;
 
+export const GET_GROUPS = gql`
+  query GetGroups {
+    getGroups {
+      id
+      name
+      members { id firstName lastName image }
+    }
+  }
+`;
+
 export const getUsersSqlClauses = { offset: 0, limit: 50 };
 
 export function getUsersQueryVariables(loggedInUserId: string) {

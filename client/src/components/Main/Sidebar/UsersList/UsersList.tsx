@@ -14,9 +14,11 @@ type Props = {
   selectedUser?: SidebarUser;
   setSelectedUser: (user: SidebarUser) => void;
   fetchMoreUsers: (object: { variables: { loggedInUserId: string, offset: string, limit: string; }; }) => void;
+  onUserClick?: (user: SidebarUser) => void;
+  selectedMemberIds?: string[];
 };
 
-const UsersList = ({ users = [], searchValue, isMoreUsersToFetch, selectedUser, setSelectedUser, fetchMoreUsers }: Props) => {
+const UsersList = ({ users = [], searchValue, isMoreUsersToFetch, selectedUser, setSelectedUser, fetchMoreUsers, onUserClick, selectedMemberIds = [] }: Props) => {
   const { loggedInUser } = getAuthData();
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -47,8 +49,16 @@ const UsersList = ({ users = [], searchValue, isMoreUsersToFetch, selectedUser, 
       {users.filter(user => `${user.firstName} ${user.lastName}`.toUpperCase().includes(searchValue.toUpperCase()))
         .map((user, index) => (
           <Fragment key={index}>
-            <ListItem button className={cx("list-item", selectedUser?.id === user.id && "is-selected")} onClick={() => setSelectedUser({ ...user })}
-              ref={index === users.length - 1 ? lastUserRef : null}>
+            <ListItem
+              button
+              className={cx(
+                "list-item",
+                selectedUser?.id === user.id && "is-selected",
+                selectedMemberIds.includes(user.id) && "is-group-member"
+              )}
+              onClick={() => onUserClick ? onUserClick(user) : setSelectedUser({ ...user })}
+              ref={index === users.length - 1 ? lastUserRef : null}
+            >
               <Avatar alt="avatar" src={user.image} />
               <div className="text-wrapper">
                 {index > 0 && <Divider className={cx((user.latestMessage?.createdAt && "is-chatted") || "")} />}
@@ -81,6 +91,10 @@ const style = css`
 
     &.is-selected {
       background: #f0f2f5;
+    }
+    &.is-group-member {
+      border-left: 5px solid var(--green-color);
+      background: #eafff3;
     }
 
     .text-wrapper {

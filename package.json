@@ -18,5 +18,15 @@
     "copy-server-files-to-dist": "cd server && cp -r package.json ../dist && cp -r node_modules ../dist",
     "postinstall": "npm run create-dist-folder && npm run build-client && npm run build-server && rm -r client && rm -r server",
     "start": "cd dist && npm run start"
+  },
+  "dependencies": {
+    "@graphql-tools/utils": "^10.8.6",
+    "apollo-server": "^3.13.0",
+    "dotenv": "^16.5.0",
+    "pg": "^8.16.2",
+    "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "@types/sequelize": "^4.28.20"
   }
 }

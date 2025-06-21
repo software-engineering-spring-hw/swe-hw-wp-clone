@@ -9,12 +9,23 @@ import backgroundImage from "images/conversation-background.jpg";
 
 export type ConversationMessage = Omit<Message, "recipientId">;
 
-type Props = {
-  messages?: ConversationMessage[];
-  chatBottomRef: RefObject<HTMLDivElement>;
+// Add a type for group messages with sender
+export type GroupConversationMessage = ConversationMessage & {
+  sender?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    image?: string;
+  };
 };
 
-const Conversation = ({ messages = [], chatBottomRef }: Props) => {
+type Props = {
+  messages?: (ConversationMessage | GroupConversationMessage)[];
+  chatBottomRef: RefObject<HTMLDivElement>;
+  isGroup?: boolean;
+};
+
+const Conversation = ({ messages = [], chatBottomRef, isGroup }: Props) => {
   const { loggedInUser } = getAuthData();
 
   const firstIndexesOfSeries = useMemo(() => {
@@ -41,14 +52,41 @@ const Conversation = ({ messages = [], chatBottomRef }: Props) => {
 
   return (
     <div className={style}>
-      {messages.map((message, index) => (
-        <div key={index} className={cx("message",
-          message.senderId === loggedInUser.id && "is-sent-message",
-          firstIndexesOfSeries.includes(index) && "is-first-of-series")}>
-          <Typography component="span">{message.content}</Typography>
-          <Typography component="small">{timeDisplayer(message.createdAt)}</Typography>
-        </div>
-      ))}
+      {messages.map((message, index) => {
+        const groupMsg = message as GroupConversationMessage;
+        const isOwn = message.senderId === loggedInUser.id;
+        // SYSTEM MESSAGE: senderId is null
+        if (isGroup && message.senderId == null) {
+          return (
+            <div key={index} style={{ textAlign: 'center', color: '#888', fontStyle: 'italic', margin: '8px 0', fontSize: 13 }}>
+              {message.content}
+              <div style={{ fontSize: 11, marginTop: 2 }}>
+                {message.createdAt && !isNaN(Date.parse(message.createdAt))
+                  ? timeDisplayer(message.createdAt)
+                  : "-"}
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div key={index} className={cx("message",
+            isOwn && "is-sent-message",
+            firstIndexesOfSeries.includes(index) && "is-first-of-series")}
+          >
+            {isGroup && groupMsg.sender && !isOwn && (
+              <Typography component="div" style={{ fontWeight: 600, fontSize: 13, color: '#2e7d32', marginBottom: 2 }}>
+                {groupMsg.sender.firstName} {groupMsg.sender.lastName}
+              </Typography>
+            )}
+            <Typography component="span" style={{ display: 'block', marginBottom: 16 }}>{message.content}</Typography>
+            <Typography component="small" style={{ display: 'block', color: '#888', fontSize: 12, marginTop: -12, marginBottom: 2, textAlign: isOwn ? 'right' : 'left', position: 'static' }}>
+              {message.createdAt && !isNaN(Date.parse(message.createdAt))
+                ? timeDisplayer(message.createdAt)
+                : "-"}
+            </Typography>
+          </div>
+        );
+      })}
       <div className="chat-bottom" ref={chatBottomRef} />
     </div>
   );

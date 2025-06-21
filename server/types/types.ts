@@ -19,3 +19,24 @@ export type SendMessagePayload = {
 };
 
 export type ContextUser = Pick<User, "id" | "firstName" | "lastName">;
+
+export type Group = {
+  id: string;
+  name: string;
+  createdAt: string;
+};
+
+export type GroupMember = {
+  id: string;
+  groupId: string;
+  userId: string;
+  createdAt: string;
+};
+
+export type GroupMessage = {
+  id: string;
+  groupId: string;
+  senderId: string;
+  content: string;
+  createdAt: string;
+};
