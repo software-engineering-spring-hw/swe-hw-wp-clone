@@ -7,7 +7,7 @@ import { useMutation } from "@apollo/client";
 import { SEND_MESSAGE } from "services/graphql";
 import { IconButton, InputBase } from "@material-ui/core";
 import { getFormValidationErrors } from "@guybendavid/utils";
-import { Mood as MoodIcon, Attachment as AttachmentIcon, Mic as MicIcon } from "@material-ui/icons";
+import { Mood as MoodIcon, Attachment as AttachmentIcon, Mic as MicIcon, Forward5 } from "@material-ui/icons";
 
 type Props = {
   selectedUser: SidebarUser;
@@ -16,6 +16,7 @@ type Props = {
 const MessageCreator = ({ selectedUser }: Props) => {
   const { handleServerErrors, setSnackBarError } = useContext(AppContext) as AppContextType;
   const [message, setMessage] = useState("");
+  const [timeLeft, setTimeLeft] = useState(5);
 
   useEffect(() => {
     setMessage("");
@@ -39,6 +40,27 @@ const MessageCreator = ({ selectedUser }: Props) => {
     await sendMessage({ variables: sendMessagePayload });
   };
 
+  const handleSubmit5Second = async (e: SyntheticEvent) => {
+    e.preventDefault();
+    const sendMessagePayload = { content: message, recipientId: selectedUser.id };
+    const { message: errorMessage } = getFormValidationErrors(sendMessagePayload);
+
+    if (errorMessage) {
+      setSnackBarError(errorMessage);
+      return;
+    }
+    
+    const timer = setInterval(() => {
+      setTimeLeft(timeLeft => timeLeft - 1);
+    }, 1000);
+    
+    setTimeout(async () => {
+      await sendMessage({ variables: sendMessagePayload });
+      clearInterval(timer);
+      setTimeLeft(5);
+    }, 5000)
+  };
+
   return (
     <div className={style}>
       {[MoodIcon, AttachmentIcon].map((Icon, index) => (
@@ -49,6 +71,7 @@ const MessageCreator = ({ selectedUser }: Props) => {
       <form onSubmit={handleSubmit}>
         <div className="input-wrapper">
           <InputBase
+            disabled={timeLeft != 5}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             className="input-base"
@@ -58,8 +81,12 @@ const MessageCreator = ({ selectedUser }: Props) => {
           />
         </div>
       </form>
+      { timeLeft != 5 && (<div>{timeLeft}</div>) }
       <IconButton>
         <MicIcon />
+      </IconButton>
+      <IconButton onClick={handleSubmit5Second}>
+        <Forward5 />
       </IconButton>
     </div>
   );

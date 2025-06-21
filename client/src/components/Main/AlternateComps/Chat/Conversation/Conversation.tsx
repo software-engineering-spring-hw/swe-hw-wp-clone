@@ -6,6 +6,8 @@ import { Typography } from "@material-ui/core";
 import { timeDisplayer } from "@guybendavid/utils";
 import { verticalOverflowHandler } from "styles/reusable-css-in-js-styles";
 import backgroundImage from "images/conversation-background.jpg";
+import { useMutation } from "@apollo/client";
+import { AppContext, AppContextType } from "contexts/AppContext";
 
 export type ConversationMessage = Omit<Message, "recipientId">;
 
@@ -18,6 +20,9 @@ const Conversation = ({ messages = [], chatBottomRef }: Props) => {
   const { loggedInUser } = getAuthData();
   const [showScrollButton, setShowScrollButton] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null); 
+
+  const [pinMessage] = useMutation(PIN_MESSAGE);
+  const [unpinMessage] = useMutation(UNPIN_MESSAGE);
 
   const firstIndexesOfSeries = useMemo(() => {
     if (messages.length === 0) return [];

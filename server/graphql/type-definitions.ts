@@ -48,6 +48,7 @@ export default gql`
     recipientId: ID!
     content: String
     createdAt: String
+    isPinned: Boolean!
   }
 
   type Query {
@@ -55,6 +56,7 @@ export default gql`
     getUser(id: ID!): User!
     getMessages(otherUserId: ID!): [Message]!
   }
+<<<<<<< HEAD
 
  type Mutation {
   login(username: String!, password: String!): AuthOperationResponse!
@@ -63,6 +65,15 @@ export default gql`
   updateUserNotes(userId: ID!, userNotes: String!): User!
 }
 
+=======
+  type Mutation {
+    login(username: String! password: String!): AuthOperationResponse!
+    register(firstName: String! lastName: String! username: String! password: String!): AuthOperationResponse!
+    sendMessage(recipientId: ID! content: String!): Message!
+    pinMessage(id: ID!): Message
+    unpinMessage(id: ID!): Message
+  }
+>>>>>>> main
   type Subscription {
     newMessage: Message!
   }

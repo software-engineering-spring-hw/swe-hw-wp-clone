@@ -24,6 +24,12 @@ export default (sequelize: Sequelize, DataTypes: any) => {
       type: DataTypes.STRING,
       allowNull: false
     },
+    isPinned: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: "is_pinned"
+    },
     createdAt: {
       type: DataTypes.DATE,
       field: "created_at"

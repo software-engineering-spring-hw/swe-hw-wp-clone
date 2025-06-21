@@ -21,4 +21,5 @@ export type Message = {
   recipientId: string;
   content: string;
   createdAt: string;
+  isPinned: boolean;
 };
