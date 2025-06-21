@@ -16,7 +16,14 @@ type Props = {
   fetchMoreUsers: (object: { variables: { loggedInUserId: string, offset: string, limit: string; }; }) => void;
 };
 
-const UsersList = ({ users = [], searchValue, isMoreUsersToFetch, selectedUser, setSelectedUser, fetchMoreUsers }: Props) => {
+const UsersList = ({
+  users = [],
+  searchValue,
+  isMoreUsersToFetch,
+  selectedUser,
+  setSelectedUser,
+  fetchMoreUsers
+}: Props) => {
   const { loggedInUser } = getAuthData();
   const observer = useRef<IntersectionObserver | null>(null);
 
@@ -44,20 +51,36 @@ const UsersList = ({ users = [], searchValue, isMoreUsersToFetch, selectedUser, 
 
   return (
     <List className={style}>
-      {users.filter(user => `${user.firstName} ${user.lastName}`.toUpperCase().includes(searchValue.toUpperCase()))
+      {users
+        .filter(user =>
+          `${user.firstName} ${user.lastName}`.toUpperCase().includes(searchValue.toUpperCase())
+        )
         .map((user, index) => (
           <Fragment key={index}>
-            <ListItem button className={cx("list-item", selectedUser?.id === user.id && "is-selected")} onClick={() => setSelectedUser({ ...user })}
-              ref={index === users.length - 1 ? lastUserRef : null}>
+            <ListItem
+              button
+              className={cx("list-item", selectedUser?.id === user.id && "is-selected")}
+              onClick={() => setSelectedUser({ ...user })}
+              ref={index === users.length - 1 ? lastUserRef : null}
+            >
               <Avatar alt="avatar" src={user.image} />
               <div className="text-wrapper">
-                {index > 0 && <Divider className={cx((user.latestMessage?.createdAt && "is-chatted") || "")} />}
+                {index > 0 && (
+                  <Divider className={cx((user.latestMessage?.createdAt && "is-chatted") || "")} />
+                )}
                 <div className="first-row">
-                  <Typography component="span" className="fullname">{`${user.firstName} ${user.lastName}`}</Typography>
-                  <Typography component="small">{timeDisplayer(user.latestMessage?.createdAt || "")}</Typography>
+                <Typography component="span" className="fullname">
+                {`${user.firstName} ${user.lastName}`}
+                {user.userNotes && ` (${user.userNotes})`}
+                </Typography>
+                  <Typography component="small">
+                    {timeDisplayer(user.latestMessage?.createdAt || "")}
+                  </Typography>
                 </div>
                 <div className="second-row">
-                  <Typography className="last-message" component="span">{user.latestMessage?.content}</Typography>
+                  <Typography className="last-message" component="span">
+                    {user.latestMessage?.content}
+                  </Typography>
                 </div>
               </div>
             </ListItem>
@@ -104,6 +127,14 @@ const style = css`
           color: var(--text-color);
           ${overflowHandler("260px")};
         }
+      }
+
+      .user-note {
+        margin-top: 2px;
+        font-style: italic;
+        color: gray;
+        font-size: 0.75rem;
+        ${overflowHandler("260px")};
       }
 
       hr {

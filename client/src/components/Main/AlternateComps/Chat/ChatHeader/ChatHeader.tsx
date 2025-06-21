@@ -15,7 +15,7 @@ const ChatHeader = ({ selectedUser }: Props) => {
       <div className="left-side">
         <Avatar alt="avatar" src={selectedUser.image} />
         <div className="text-wrapper">
-          <Typography className="fullname" component="span">{`${selectedUser.firstName} ${selectedUser.lastName}`}</Typography>
+        <Typography className="fullname" component="span">{`${selectedUser.firstName} ${selectedUser.lastName}`}{selectedUser.userNotes && ` (${selectedUser.userNotes})`}</Typography>
           <Typography component="small">{timeDisplayer(selectedUser.latestMessage.createdAt || "")}</Typography>
         </div>
       </div>

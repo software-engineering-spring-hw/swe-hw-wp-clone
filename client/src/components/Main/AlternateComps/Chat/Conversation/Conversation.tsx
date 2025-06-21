@@ -1,4 +1,4 @@
-import { useMemo, RefObject } from "react";
+import { useMemo, RefObject, useRef, useEffect, useState } from "react";
 import { css, cx } from "@emotion/css";
 import { getAuthData } from "services/auth";
 import { Message } from "types/types";
@@ -16,6 +16,8 @@ type Props = {
 
 const Conversation = ({ messages = [], chatBottomRef }: Props) => {
   const { loggedInUser } = getAuthData();
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null); 
 
   const firstIndexesOfSeries = useMemo(() => {
     if (messages.length === 0) return [];
@@ -39,17 +41,45 @@ const Conversation = ({ messages = [], chatBottomRef }: Props) => {
     return indexes;
   }, [messages]);
 
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    const container = chatContainerRef.current;
+    const handleScroll = () => {
+      if (!container) return;
+      const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 200;
+      setShowScrollButton(!isAtBottom);
+    };
+
+    container?.addEventListener("scroll", handleScroll);
+    return () => container?.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className={style}>
+    <div className={style} ref={chatContainerRef}>
       {messages.map((message, index) => (
-        <div key={index} className={cx("message",
-          message.senderId === loggedInUser.id && "is-sent-message",
-          firstIndexesOfSeries.includes(index) && "is-first-of-series")}>
+        <div
+          key={index}
+          className={cx("message",
+            message.senderId === loggedInUser.id && "is-sent-message",
+            firstIndexesOfSeries.includes(index) && "is-first-of-series"
+          )}
+        >
           <Typography component="span">{message.content}</Typography>
           <Typography component="small">{timeDisplayer(message.createdAt)}</Typography>
         </div>
       ))}
       <div className="chat-bottom" ref={chatBottomRef} />
+      {showScrollButton && (
+        <button
+          className="scroll-to-bottom-btn"
+          onClick={() => chatBottomRef.current?.scrollIntoView({ behavior: "smooth" })}
+        >
+          📩 Go to Bottom
+        </button>
+      )}
     </div>
   );
 };
@@ -65,6 +95,7 @@ const style = css`
   flex: 1;
   padding: 20px 70px 80px;
   gap: 5px;
+  position: relative;
 
   .message {
     position: relative;
@@ -119,5 +150,21 @@ const style = css`
       right: 10px;
       bottom: 2px;
     }
+  }
+
+  .scroll-to-bottom-btn {
+    position: fixed;
+    bottom: 100px;
+    right: 40px;
+    background-color: #25d366;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: opacity 0.3s ease;
+    z-index: 999;
   }
 `;

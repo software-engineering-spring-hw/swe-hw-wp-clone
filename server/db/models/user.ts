@@ -23,11 +23,15 @@ export default (sequelize: Sequelize, DataTypes: any) => {
       }
     },
     password: {
-      type: DataTypes.STRING(20),
+      type: DataTypes.STRING,
       allowNull: false
     },
     image: {
       type: DataTypes.STRING
+    },userNotes: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    field: "user_notes"
     }
   }, {
     modelName: "User",

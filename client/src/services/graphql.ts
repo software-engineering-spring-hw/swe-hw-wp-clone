@@ -44,6 +44,7 @@ export const GET_All_USERS_EXCEPT_LOGGED = gql`
           content
           createdAt
         }
+        userNotes     # userNotes alanı burada
       }
       totalUsersExceptLoggedUser
     }
@@ -57,6 +58,7 @@ export const GET_USER = gql`
       firstName
       lastName
       image
+      userNotes    # userNotes alanı burada
     }
   }
 `;
@@ -92,6 +94,15 @@ export const NEW_MESSAGE = gql`
   }
 `;
 
+export const UPDATE_USER_NOTE = gql`
+  mutation UpdateUserNotes($userId: ID!, $userNotes: String!) {
+    updateUserNotes(userId: $userId, userNotes: $userNotes) {
+      id
+      userNotes
+    }
+  }
+`;
+
 export const getUsersSqlClauses = { offset: 0, limit: 50 };
 
 export function getUsersQueryVariables(loggedInUserId: string) {
@@ -100,4 +111,4 @@ export function getUsersQueryVariables(loggedInUserId: string) {
     offset: `${getUsersSqlClauses.offset}`,
     limit: `${getUsersSqlClauses.limit}`
   };
-};
+}

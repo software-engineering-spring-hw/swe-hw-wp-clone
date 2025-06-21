@@ -12,6 +12,7 @@ export interface SidebarUser extends Omit<User, "username" | "password"> {
     content: string | null;
     createdAt: string | null;
   };
+  userNotes?: string; 
 }
 
 export type Message = {

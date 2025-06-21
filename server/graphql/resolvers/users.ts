@@ -8,7 +8,7 @@ import { getTotalUsers, getUsersWithLatestMessage } from "../../db/raw-queries/u
 // eslint-disable-next-line
 const generateImage = require("../../utils/generate-image");
 
-interface GetUsersWithLatestMessageResponse extends Omit<ContextUser, "username" | "password">, LatestMessage { }
+interface GetUsersWithLatestMessageResponse extends Omit<ContextUser, "username" | "password">, LatestMessage {}
 
 export default {
   Query: {
@@ -46,8 +46,8 @@ export default {
         throw new UserInputError("Username already exists");
       }
 
-      const hasedPassword = await bcrypt.hash(password as string, 6);
-      const user = await User.create({ firstName, lastName, username, password: hasedPassword, image: generateImage() });
+      const hashedPassword = await bcrypt.hash(password as string, 6);
+      const user = await User.create({ firstName, lastName, username, password: hashedPassword, image: generateImage() });
       const { password: _userPassword, ...safeUserData } = user.toJSON();
       return { user: safeUserData, token: generateToken({ id: user.id, firstName, lastName }) };
     },
@@ -65,8 +65,21 @@ export default {
         throw new UserInputError("Password is incorrect");
       }
 
-      const { id, firstName, lastName, image } = user;
-      return { user: { id, firstName, lastName, username, image }, token: generateToken({ id, firstName, lastName }) };
+      const { id, firstName, lastName, image, userNotes } = user;
+      return { user: { id, firstName, lastName, username, image, userNotes }, token: generateToken({ id, firstName, lastName }) };
+    },
+
+    updateUserNotes: async (_parent: any, args: { userId: string; userNotes: string }) => {
+      const { userId, userNotes } = args;
+      const user = await User.findByPk(userId);
+      if (!user) {
+        throw new UserInputError("User not found");
+      }
+
+      user.userNotes = userNotes;
+      await user.save();
+
+      return user.toJSON();
     }
   }
 };
